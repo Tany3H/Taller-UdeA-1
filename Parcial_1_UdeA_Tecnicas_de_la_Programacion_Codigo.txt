@@ -1,0 +1,660 @@
+
+
+===== Dado.java =====
+
+
+package ooudea.taller2.ej1;
+
+import javax.swing.*;
+import java.util.Random;
+
+public class Dado {
+    private int numero = 1;
+
+    public Dado() {}
+
+    public void lanzar(Random r) {
+        numero = r.nextInt(6) + 1;
+    }
+
+    public void mostrar(JLabel lblDado) {
+        lblDado.setIcon(new ImageIcon(getClass().getResource("/Imagenes/" + numero + ".jpg")));
+    }
+
+    public int obtenerNumero() {
+        return numero;
+    }
+
+    // Utilidad para mostrar cara inicial
+    public void setNumero(int n) { this.numero = n; }
+}
+
+
+===== FrmLanzamientosDados.java =====
+
+
+package ooudea.taller2.ej1;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Random;
+
+public class FrmLanzamientosDados extends JFrame {
+
+    private final JLabel lblDado1 = new JLabel();
+    private final JLabel lblDado2 = new JLabel();
+    private final JLabel lblLanzamientos = new JLabel("0");
+    private final JLabel lblCenas = new JLabel("0");
+    private final JButton btnIniciar = new JButton("Iniciar");
+    private final JButton btnLanzar = new JButton("Lanzar");
+
+    private final Dado d1 = new Dado();
+    private final Dado d2 = new Dado();
+    private final Random r = new Random();
+    private int lanzamientos = 0;
+    private int cenas = 0;
+
+    public FrmLanzamientosDados() {
+        super("Juego de Dados — Cenas (11 o 12)");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(500, 330);
+        setLayout(null);
+        setLocationRelativeTo(null);
+
+        lblDado1.setBounds(40, 30, 200, 200);
+        lblDado2.setBounds(260, 30, 200, 200);
+        // Cargar cara inicial 1.jpg
+        d1.setNumero(1); d1.mostrar(lblDado1);
+        d2.setNumero(1); d2.mostrar(lblDado2);
+
+        JLabel jLabel1 = new JLabel("Lanzamientos");
+        JLabel jLabel2 = new JLabel("Cenas");
+        jLabel1.setBounds(120, 235, 120, 20);
+        jLabel2.setBounds(290, 235, 80, 20);
+
+        lblLanzamientos.setFont(new Font("Impact", Font.PLAIN, 24));
+        lblCenas.setFont(new Font("Impact", Font.PLAIN, 24));
+        lblLanzamientos.setBounds(130, 255, 100, 30);
+        lblCenas.setBounds(290, 255, 100, 30);
+
+        btnIniciar.setBounds(40, 10, 100, 25);
+        btnLanzar.setBounds(360, 10, 100, 25);
+        btnLanzar.setEnabled(false);
+
+        add(btnIniciar); add(btnLanzar);
+        add(lblDado1); add(lblDado2);
+        add(jLabel1); add(jLabel2);
+        add(lblLanzamientos); add(lblCenas);
+
+        btnIniciar.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                lanzamientos = 0;
+                cenas = 0;
+                lblLanzamientos.setText("0");
+                lblCenas.setText("0");
+                btnLanzar.setEnabled(true);
+            }
+        });
+
+        btnLanzar.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                d1.lanzar(r); d1.mostrar(lblDado1);
+                d2.lanzar(r); d2.mostrar(lblDado2);
+                lanzamientos++;
+                if (d1.obtenerNumero() + d2.obtenerNumero() >= 11) {
+                    cenas++;
+                }
+                lblLanzamientos.setText(String.valueOf(lanzamientos));
+                lblCenas.setText(String.valueOf(cenas));
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new FrmLanzamientosDados().setVisible(true));
+    }
+}
+
+
+===== Tabla.java =====
+
+
+package ooudea.taller2.ej2;
+
+import java.util.Random;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+public class Tabla {
+    private Random r;
+    private int[][] tabla;
+
+    public Tabla(int numero) {
+        r = new Random(System.currentTimeMillis() * (numero + 1));
+        tabla = new int[5][5];
+        for (int c = 0; c < 5; c++) {
+            for (int f = 0; f < 5; f++) {
+                tabla[f][c] = 0;
+                if (f != 2 || c != 2) {
+                    while (tabla[f][c] == 0) {
+                        int n = (c * 15) + r.nextInt(15) + 1;
+                        if (!verificarNumero(n, c)) {
+                            tabla[f][c] = n;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean verificarNumero(int numero, int columna) {
+        for (int f = 0; f < 5; f++) {
+            if (tabla[f][columna] == numero) return true;
+        }
+        return false;
+    }
+
+    public int[][] obtenerTabla() {
+        return tabla;
+    }
+
+    public void mostrar(JTable tbl) {
+        int f = tabla.length, c = tabla[0].length;
+        String[][] m = new String[f][c];
+        for (int i = 0; i < f; i++) {
+            for (int j = 0; j < c; j++) {
+                if (i != 2 || j != 2) {
+                    m[i][j] = String.valueOf(tabla[i][j]);
+                    if (Cantor.verificarSacada(tabla[i][j])) {
+                        m[i][j] += "*";
+                    }
+                } else {
+                    m[i][j] = "";
+                }
+            }
+        }
+        tbl.setModel(new DefaultTableModel(m, Cantor.obtenerEncabezados()));
+    }
+
+    public boolean verificarBingo() {
+        boolean bingo = true;
+        int ft = 0;
+        while (ft < 5 && bingo) {
+            int c = 0;
+            while (c < 5 && bingo) {
+                if (ft != 2 || c != 2) {
+                    bingo = false;
+                    int fb = 0;
+                    while (fb < 15 && !bingo) {
+                        if (tabla[ft][c] == Cantor.obtenerBalotas()[fb][c]) {
+                            bingo = true;
+                        } else {
+                            fb++;
+                        }
+                    }
+                }
+                c++;
+            }
+            ft++;
+        }
+        return bingo;
+    }
+
+    public boolean verificarBinguito() {
+        boolean binguito = false;
+        int c, fb;
+        int ft = 0;
+        while (ft < 5 && !binguito) {
+            c = 0;
+            binguito = true;
+            while (c < 5 && binguito) {
+                if (ft != 2 || c != 2) {
+                    binguito = false;
+                    fb = 0;
+                    while (fb < 15 && !binguito) {
+                        if (tabla[ft][c] == Cantor.obtenerBalotas()[fb][c]) {
+                            binguito = true;
+                        } else {
+                            fb++;
+                        }
+                    }
+                }
+                c++;
+            }
+            ft++;
+        }
+        if (!binguito) {
+            c = 0;
+            while (c < 5 && !binguito) {
+                ft = 0;
+                binguito = true;
+                while (ft < 5 && binguito) {
+                    if (ft != 2 || c != 2) {
+                        binguito = false;
+                        fb = 0;
+                        while (fb < 15 && !binguito) {
+                            if (tabla[ft][c] == Cantor.obtenerBalotas()[fb][c]) {
+                                binguito = true;
+                            } else {
+                                fb++;
+                            }
+                        }
+                    }
+                    ft++;
+                }
+                c++;
+            }
+        }
+        return binguito;
+    }
+}
+
+
+===== Cantor.java =====
+
+
+package ooudea.taller2.ej2;
+
+import java.util.Random;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+public abstract class Cantor {
+    private static final String[] encabezados = new String[]{"B","I","N","G","O"};
+    private static final int[][] balotas = new int[15][5];
+    private static int totalBalotasSacadas = 0;
+    private static final Random r = new Random();
+
+    public static void iniciar() {
+        for (int c = 0; c < 5; c++) {
+            for (int f = 0; f < 15; f++) {
+                balotas[f][c] = 0;
+            }
+        }
+        totalBalotasSacadas = 0;
+    }
+
+    public static int sacarBalota() {
+        int numero = 0;
+        if (totalBalotasSacadas < 75) {
+            boolean sacada = false;
+            while (!sacada) {
+                numero = r.nextInt(75) + 1;
+                int f = numero % 15;
+                if (f == 0) f = 15;
+                int c = (numero - f) / 15;
+                if (balotas[f - 1][c] == 0) {
+                    sacada = true;
+                    balotas[f - 1][c] = numero;
+                    totalBalotasSacadas++;
+                }
+            }
+        }
+        return numero;
+    }
+
+    public static void mostrarBalotas(JTable tbl) {
+        int f = balotas.length, c = balotas[0].length;
+        String[][] m = new String[f][c];
+        for (int i = 0; i < f; i++) {
+            for (int j = 0; j < c; j++) {
+                m[i][j] = (balotas[i][j] == 0) ? "" : String.valueOf(balotas[i][j]);
+            }
+        }
+        tbl.setModel(new DefaultTableModel(m, encabezados));
+    }
+
+    public static boolean verificarSacada(int numero) {
+        if (totalBalotasSacadas == 0) return false;
+        int f = numero % 15;
+        if (f == 0) f = 15;
+        int c = (numero - f) / 15;
+        return balotas[f - 1][c] != 0;
+    }
+
+    public static String[] obtenerEncabezados() { return encabezados; }
+    public static int[][] obtenerBalotas() { return balotas; }
+    public static int obtenerTotalBalotasSacadas() { return totalBalotasSacadas; }
+}
+
+
+===== FrmBingo.java =====
+
+
+package ooudea.taller2.ej2;
+
+import javax.swing.*;
+import java.awt.event.*;
+
+public class FrmBingo extends JFrame {
+
+    private final JLabel jLabel1 = new JLabel("Total Tablas");
+    private final JLabel jLabel2 = new JLabel("Tabla");
+    private final JTextField txtTotalTablas = new JTextField();
+    private final JComboBox<String> cmbTablas = new JComboBox<>();
+    private final JButton btnIniciar = new JButton("Iniciar");
+    private final JButton btnSacarBalota = new JButton("Sacar Balota");
+    private final JTable tblBingo = new JTable();
+    private final JTable tblTabla = new JTable();
+
+    private Tabla[] tablas;
+
+    public FrmBingo() {
+        super("Bingo — Cantor y Tablas");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(700, 480);
+        setLayout(null);
+        setLocationRelativeTo(null);
+
+        jLabel1.setBounds(20, 15, 100, 24);
+        txtTotalTablas.setBounds(110, 15, 80, 24);
+        btnIniciar.setBounds(210, 15, 100, 24);
+        jLabel2.setBounds(330, 15, 60, 24);
+        cmbTablas.setBounds(380, 15, 120, 24);
+        btnSacarBalota.setBounds(520, 15, 120, 24);
+        btnSacarBalota.setEnabled(false);
+
+        JScrollPane spBingo = new JScrollPane(tblBingo);
+        JScrollPane spTabla = new JScrollPane(tblTabla);
+        spBingo.setBounds(20, 60, 320, 360);
+        spTabla.setBounds(360, 60, 300, 360);
+
+        add(jLabel1); add(txtTotalTablas); add(btnIniciar);
+        add(jLabel2); add(cmbTablas); add(btnSacarBalota);
+        add(spBingo); add(spTabla);
+
+        btnIniciar.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                int totalTablas = 2;
+                try { totalTablas = Integer.parseInt(txtTotalTablas.getText()); }
+                catch (Exception ex) { txtTotalTablas.setText("2"); }
+                tablas = new Tabla[totalTablas];
+                cmbTablas.removeAllItems();
+                for (int i = 0; i < totalTablas; i++) {
+                    tablas[i] = new Tabla(i);
+                    cmbTablas.addItem("Tabla " + (i + 1));
+                }
+                Cantor.iniciar();
+                Cantor.mostrarBalotas(tblBingo);
+                btnSacarBalota.setEnabled(true);
+            }
+        });
+
+        cmbTablas.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                if (cmbTablas.getSelectedIndex() >= 0 && tablas != null) {
+                    tablas[cmbTablas.getSelectedIndex()].mostrar(tblTabla);
+                }
+            }
+        });
+
+        btnSacarBalota.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                if (Cantor.sacarBalota() > 0) {
+                    Cantor.mostrarBalotas(tblBingo);
+                    if (cmbTablas.getSelectedIndex() >= 0) {
+                        tablas[cmbTablas.getSelectedIndex()].mostrar(tblTabla);
+                    }
+                    for (int i = 0; i < cmbTablas.getItemCount(); i++) {
+                        if (tablas[i].verificarBingo()) {
+                            JOptionPane.showMessageDialog(new JFrame("Verificando Bingo"),
+                                    "BINGO para el jugador " + (i + 1));
+                        } else if (tablas[i].verificarBinguito()) {
+                            JOptionPane.showMessageDialog(new JFrame("Verificando Binguito"),
+                                    "BINGUITO para el jugador " + (i + 1));
+                        }
+                    }
+                    if (Cantor.obtenerTotalBalotasSacadas() == 75) {
+                        btnSacarBalota.setEnabled(false);
+                        JOptionPane.showMessageDialog(new JFrame(),
+                                "El juego termina porque no hay más balotas para sacar");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(new JFrame(), "El juego había terminado");
+                }
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new FrmBingo().setVisible(true));
+    }
+}
+
+
+===== PintaCarta.java =====
+
+
+package ooudea.taller2.ej3;
+
+public enum PintaCarta {
+    NINGUNO,
+    TREBOL,
+    PICA,
+    CORAZON,
+    DIAMANTE
+}
+
+
+===== NombreCarta.java =====
+
+
+package ooudea.taller2.ej3;
+
+public enum NombreCarta {
+    NINGUNO,
+    ACE,
+    DOS,
+    TRES,
+    CUATRO,
+    CINCO,
+    SEIS,
+    SIETE,
+    OCHO,
+    NUEVE,
+    DIEZ,
+    JACK,
+    QUEEN,
+    KING
+}
+
+
+===== Carta.java =====
+
+
+package ooudea.taller2.ej3;
+
+import javax.swing.*;
+import java.util.Random;
+
+public class Carta {
+    private int indice; // 1..52
+
+    public Carta(Random r) {
+        indice = r.nextInt(52) + 1;
+    }
+
+    public void mostrarCarta(int x, int y, JPanel pnl, boolean tapada) {
+        String nombreImagen;
+        if (tapada) nombreImagen = "/Cartas/Tapada.jpg";
+        else nombreImagen = "/Cartas/Carta" + indice + ".jpg";
+
+        ImageIcon imagen = new ImageIcon(getClass().getResource(nombreImagen));
+        JLabel lblCarta = new JLabel(imagen);
+        lblCarta.setBounds(x, y, imagen.getIconWidth(), imagen.getIconHeight());
+        pnl.add(lblCarta);
+    }
+
+    public PintaCarta obtenerPinta() {
+        if (indice <= 13) return PintaCarta.TREBOL;
+        else if (indice <= 26) return PintaCarta.PICA;
+        else if (indice <= 39) return PintaCarta.CORAZON;
+        else return PintaCarta.DIAMANTE;
+    }
+
+    public NombreCarta obtenerNombre() {
+        int numero = indice % 13;
+        if (numero == 0) numero = 13;
+        return NombreCarta.values()[numero];
+    }
+
+    public int obtenerValor() {
+        int numero = indice % 13;
+        if (numero == 0) numero = 13;
+        // ACE, JACK, QUEEN, KING => 10; else number
+        if (numero == 1 || numero >= 11) return 10;
+        else return numero;
+    }
+}
+
+
+===== Jugador.java =====
+
+
+package ooudea.taller2.ej3;
+
+import javax.swing.*;
+import java.util.Random;
+
+public class Jugador {
+    private final Random r;
+    private Carta[] cartas;
+
+    // Para "figuras"
+    private Figura[] figuras;
+    private NombreCarta[] cartasFigura;
+
+    public Jugador() {
+        r = new Random();
+    }
+
+    public void repartir() {
+        cartas = new Carta[10];
+        for (int i = 0; i < 10; i++) cartas[i] = new Carta(r);
+    }
+
+    public void mostrar(JPanel pnl, boolean tapada) {
+        pnl.removeAll();
+        for (int i = 0; i < 10; i++) {
+            cartas[i].mostrarCarta(5 + i * 40, 5, pnl, tapada);
+        }
+        pnl.revalidate();
+        pnl.repaint();
+    }
+
+    public String obtenerFiguras() {
+        figuras = null;
+        int[] contadores = new int[13];
+        for (int i = 0; i < 10; i++) {
+            contadores[cartas[i].obtenerNombre().ordinal() - 1]++;
+        }
+        int totalFiguras = 0;
+        for (int i = 0; i < 13; i++) {
+            if (contadores[i] >= 3) totalFiguras++;
+        }
+        if (totalFiguras > 0) {
+            figuras = new Figura[totalFiguras];
+            cartasFigura = new NombreCarta[totalFiguras];
+            totalFiguras = 0;
+            for (int i = 0; i < 13; i++) {
+                if (contadores[i] >= 3) {
+                    figuras[totalFiguras] = Figura.values()[contadores[i]];
+                    cartasFigura[totalFiguras] = NombreCarta.values()[i + 1];
+                    totalFiguras++;
+                }
+            }
+        }
+        String mensaje;
+        if (figuras == null) {
+            mensaje = "No hay figuras";
+        } else {
+            StringBuilder sb = new StringBuilder("El jugador tiene las siguientes figuras:\n");
+            for (int i = 0; i < figuras.length; i++) {
+                sb.append(figuras[i].name()).append(" de ").append(cartasFigura[i].toString()).append("\n");
+            }
+            mensaje = sb.toString();
+        }
+        return mensaje;
+    }
+}
+
+
+===== Figura.java =====
+
+
+package ooudea.taller2.ej3;
+
+public enum Figura {
+    CERO, // dummy para alinear indices
+    UNO,
+    DOS,
+    TERNA,
+    CUARTA,
+    QUINTA,
+    SEXTA,
+    SEPTIMA,
+    OCTAVA,
+    NOVENA,
+    DECIMA
+}
+
+
+===== FrmJuego.java =====
+
+
+package ooudea.taller2.ej3;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class FrmJuego extends JFrame {
+
+    private final JButton btnRepartir = new JButton("Repartir");
+    private final JButton btnVerificar = new JButton("Verificar");
+    private final JTabbedPane tpJugadores = new JTabbedPane();
+    private final JPanel pnlJugador1 = new JPanel(null);
+    private final JPanel pnlJugador2 = new JPanel(null);
+
+    private final Jugador[] jugadores = new Jugador[2];
+
+    public FrmJuego() {
+        super("Apuntado — Baraja Inglesa");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(520, 380);
+        setLayout(null);
+        setLocationRelativeTo(null);
+
+        btnRepartir.setBounds(20, 10, 100, 28);
+        btnVerificar.setBounds(140, 10, 100, 28);
+        add(btnRepartir); add(btnVerificar);
+
+        tpJugadores.setBounds(20, 50, 470, 280);
+        tpJugadores.add("Martín Estrada Contreras", pnlJugador1);
+        tpJugadores.add("Raúl Vidal", pnlJugador2);
+        add(tpJugadores);
+
+        jugadores[0] = new Jugador();
+        jugadores[1] = new Jugador();
+
+        btnRepartir.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                for (Jugador j : jugadores) j.repartir();
+                jugadores[0].mostrar(pnlJugador1, false);
+                jugadores[1].mostrar(pnlJugador2, false);
+            }
+        });
+
+        btnVerificar.addActionListener(new ActionListener() {
+            @Override public void actionPerformed(ActionEvent e) {
+                int pestaña = tpJugadores.getSelectedIndex();
+                JOptionPane.showMessageDialog(new JFrame(), jugadores[pestaña].obtenerFiguras());
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new FrmJuego().setVisible(true));
+    }
+}
