@@ -1,11 +1,11 @@
-# 🎓 Parcial 1 - UdeA: Técnicas de la Programación
+#Parcial 1 - UdeA: Técnicas de la Programación
 
 Este repositorio contiene tres ejercicios desarrollados en **Java** como parte del curso **Técnicas de la Programación** de la Universidad de Antioquia.  
 Cada ejercicio demuestra la aplicación de programación orientada a objetos (POO), uso de interfaces gráficas con **Swing**, y estructuras lógicas de control.
 
 ---
 
-## 🧩 Estructura del proyecto
+##  Estructura del proyecto
 ---
 
 ## 🎲 Ejercicio 1 - Lanzamiento de Dados
@@ -20,7 +20,7 @@ Simula el lanzamiento de dos dados de seis caras.
 
 ---
 
-## 🧮 Ejercicio 2 - Bingo
+##  Ejercicio 2 - Bingo
 Simula el juego de bingo.  
 - El **Cantor** genera números aleatorios sin repetición.  
 - La **Tabla** muestra los números cantados.  
@@ -33,7 +33,7 @@ Simula el juego de bingo.
 
 ---
 
-## 🃏 Ejercicio 3 - Apuntado (Juego de Cartas)
+##  Ejercicio 3 - Apuntado (Juego de Cartas)
 Simula un juego de cartas entre jugadores.  
 - Cada jugador recibe cartas con **nombre**, **pinta** y **figura**.  
 - Permite determinar ganadores o jugadas especiales.
@@ -50,7 +50,7 @@ Simula un juego de cartas entre jugadores.
 
 ---
 
-## ▶️ Ejecución
+##  Ejecución
 
 Cada ejercicio puede ejecutarse de forma independiente.  
 En el entorno de desarrollo:
@@ -63,9 +63,5 @@ En el entorno de desarrollo:
 
 **Lizeth Stefany Henao Toro**  
 Estudiante de Ingeniería de Sistemas - Universidad de Antioquia  
-📧 Contacto: *(opcional, puedes poner uno si deseas)*
-
----
-
 ## 🏫 Licencia
 Este proyecto es de uso académico. Se permite su visualización y reutilización con fines educativos, mencionando la fuente original.
